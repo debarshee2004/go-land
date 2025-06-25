@@ -21,5 +21,17 @@ func main() {
 	}
 
 	fmt.Printf("Wrote %d bytes to file\n", length)
+
+	readFiles()
 	defer file.Close()
+}
+
+func readFiles() {
+	databytes, err := os.ReadFile("example.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("File content:")
+	fmt.Println(string(databytes))
 }
