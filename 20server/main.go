@@ -1,87 +1,97 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
-	"strings"
 )
 
 func main() {
-	fmt.Println("Welcome to web verb video - LCO")
-	//PerformGetRequest()
-	// PerformPostJsonRequest()
-	PerformPostFormRequest()
-}
+	fmt.Println("Welcome to HTTP Requests in Go using net/http")
 
-func PerformGetRequest() {
-	const myurl = "http://localhost:8000/get"
+	// Replace this with a valid endpoint for actual testing (like https://httpbin.org/)
+	apiURL := "https://httpbin.org"
 
-	response, err := http.Get(myurl)
+	// ----------------------------
+	// Example 1: GET Request
+	fmt.Println("\nExample 1: GET Request")
+	resp, err := http.Get(apiURL + "/get")
 	if err != nil {
-		panic(err)
+		fmt.Println("GET request error:", err)
+	} else {
+		defer resp.Body.Close()
+		body, _ := io.ReadAll(resp.Body)
+		fmt.Println("GET response:", string(body))
 	}
 
-	defer response.Body.Close()
+	// ----------------------------
+	// Example 2: POST Request with JSON
+	fmt.Println("\nExample 2: POST Request")
+	postData := map[string]string{"name": "Debarshee", "language": "Go"}
+	postJSON, _ := json.Marshal(postData)
 
-	fmt.Println("Status code: ", response.StatusCode)
-	fmt.Println("Content length is: ", response.ContentLength)
-
-	var responseString strings.Builder
-	content, _ := io.ReadAll(response.Body)
-	byteCount, _ := responseString.Write(content)
-
-	fmt.Println("ByteCount is: ", byteCount)
-	fmt.Println(responseString.String())
-
-	//fmt.Println(content)
-	//fmt.Println(string(content))
-}
-
-func PerformPostJsonRequest() {
-	const myurl = "http://localhost:8000/post"
-
-	//fake json payload
-
-	requestBody := strings.NewReader(`
-		{
-			"coursename":"Let's go with golang",
-			"price": 0,
-			"platform":"learnCodeOnline.in"
-		}
-	`)
-
-	response, err := http.Post(myurl, "application/json", requestBody)
-
+	resp, err = http.Post(apiURL+"/post", "application/json", bytes.NewBuffer(postJSON))
 	if err != nil {
-		panic(err)
-	}
-	defer response.Body.Close()
-
-	content, _ := io.ReadAll(response.Body)
-
-	fmt.Println(string(content))
-}
-
-func PerformPostFormRequest() {
-	const myurl = "http://localhost:8000/postform"
-
-	//formdata
-
-	data := url.Values{}
-	data.Add("firstname", "hitesh")
-	data.Add("lastname", "choudhary")
-	data.Add("email", "hitesh@go.dev")
-
-	response, err := http.PostForm(myurl, data)
-	if err != nil {
-		panic(err)
+		fmt.Println("POST request error:", err)
+	} else {
+		defer resp.Body.Close()
+		body, _ := io.ReadAll(resp.Body)
+		fmt.Println("POST response:", string(body))
 	}
 
-	defer response.Body.Close()
+	// ----------------------------
+	// Examples 3-5: PUT, PATCH, DELETE using http.NewRequest()
+	client := &http.Client{}
 
-	content, _ := io.ReadAll(response.Body)
-	fmt.Println(string(content))
+	// ----------------------------
+	// Example 3: PUT Request
+	fmt.Println("\nExample 3: PUT Request")
+	putData := map[string]string{"update": "true"}
+	putJSON, _ := json.Marshal(putData)
 
+	putReq, _ := http.NewRequest(http.MethodPut, apiURL+"/put", bytes.NewBuffer(putJSON))
+	putReq.Header.Set("Content-Type", "application/json")
+
+	putResp, err := client.Do(putReq)
+	if err != nil {
+		fmt.Println("PUT request error:", err)
+	} else {
+		defer putResp.Body.Close()
+		body, _ := io.ReadAll(putResp.Body)
+		fmt.Println("PUT response:", string(body))
+	}
+
+	// ----------------------------
+	// Example 4: PATCH Request
+	fmt.Println("\nExample 4: PATCH Request")
+	patchData := map[string]string{"field": "patched"}
+	patchJSON, _ := json.Marshal(patchData)
+
+	patchReq, _ := http.NewRequest(http.MethodPatch, apiURL+"/patch", bytes.NewBuffer(patchJSON))
+	patchReq.Header.Set("Content-Type", "application/json")
+
+	patchResp, err := client.Do(patchReq)
+	if err != nil {
+		fmt.Println("PATCH request error:", err)
+	} else {
+		defer patchResp.Body.Close()
+		body, _ := io.ReadAll(patchResp.Body)
+		fmt.Println("PATCH response:", string(body))
+	}
+
+	// ----------------------------
+	// Example 5: DELETE Request
+	fmt.Println("\nExample 5: DELETE Request")
+	deleteReq, _ := http.NewRequest(http.MethodDelete, apiURL+"/delete", nil)
+
+	deleteResp, err := client.Do(deleteReq)
+	if err != nil {
+		fmt.Println("DELETE request error:", err)
+	} else {
+		defer deleteResp.Body.Close()
+		body, _ := io.ReadAll(deleteResp.Body)
+		fmt.Println("DELETE response:", string(body))
+	}
 }
