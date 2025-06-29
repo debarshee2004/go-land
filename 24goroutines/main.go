@@ -84,8 +84,6 @@ func main() {
 	case <-time.After(1 * time.Second):
 		fmt.Println("   Task timed out!")
 	}
-
-	fmt.Println("\n=== All goroutine examples completed ===")
 }
 
 // Worker function for WaitGroup example
